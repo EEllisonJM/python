@@ -13,23 +13,21 @@ ventana.title("2da Ley de Newton")
 ventana.geometry("300x200")  # Dimensiones de la ventana (Base_x_Altura)
 
 # Etiquetas F = m * a
-txt_titulo = tkinter.Label(ventana, text="F = m * a")
-txt_masa = tkinter.Label(ventana, text="Ingrese la masa (kg):")
-txt_aceleracion = tkinter.Label(ventana, text="Ingrese la aceleración (m/s²):")
-txt_resultado = tkinter.Label(ventana, text="Fuerza: ")
+tkinter.Label(ventana, text="F = m * a").pack()
+tkinter.Label(ventana, text="Ingrese la masa (kg):").pack()
 
 #Campos de texto
 entrada_masa = tkinter.Entry(ventana)
-entrada_aceleracion = tkinter.Entry(ventana)
-
-boton_calcular = tkinter.Button(ventana, text="Calcular Fuerza", command=calcular_fuerza)
-
-txt_titulo.pack() # Coloca el widget en la ventana
-txt_masa.pack() # Coloca el widget debajo de txt_titulo
 entrada_masa.pack() # Coloca el widget debajo de txt_masa
-txt_aceleracion.pack() # Coloca el widget debajo de entrada_masa
+
+tkinter.Label(ventana, text="Ingrese la aceleración (m/s²):").pack()
+
+entrada_aceleracion = tkinter.Entry(ventana)
 entrada_aceleracion.pack() # Coloca el widget debajo de txt_aceleracion
-boton_calcular.pack() # Coloca el widget debajo de entrada_aceleracion
+
+tkinter.Button(ventana, text="Calcular", command=calcular_fuerza).pack()
+
+txt_resultado = tkinter.Label(ventana, text="Fuerza: ")
 txt_resultado.pack() # Coloca el widget debajo de entrada_masa
 
 # Iniciar el bucle principal
