@@ -4,7 +4,7 @@ from pdf2image import convert_from_path
 pdf_path = 'Temas Selectos de Física I Bloque 2 Sesion 2.pdf'
 
 # Carpeta para guardar las imágenes
-output_folder = 'ruta/a/guardar/imagenes'
+output_folder = 'a1'
 
 # Convertir PDF a imágenes (una por cada página)
 images = convert_from_path(pdf_path)
