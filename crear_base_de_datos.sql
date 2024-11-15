@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS clientes (
     nombre TEXT NOT NULL,
     telefono INTEGER NOT NULL,
     direccion TEXT NOT NULL,
-    fecha_creado DATE DEFAULT current_timestamp
+    fecha_creado DATE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS producto (
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS producto (
     precio INTEGER NOT NULL,
     existencia INTEGER NOT NULL,
 	caducidad DATE,
-    fecha_creado DATE DEFAULT current_timestamp
+    fecha_creado DATE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS proveedor (
@@ -20,14 +20,14 @@ CREATE TABLE IF NOT EXISTS proveedor (
     nombre TEXT NOT NULL,
     telefono INTEGER NOT NULL,
     direccion TEXT NOT NULL,
-    fecha_creado DATE DEFAULT current_timestamp
+    fecha_creado DATE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS venta (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     id_cliente INTEGER,
     total INTEGER NOT NULL,
-    fecha DATE DEFAULT current_timestamp,
+    fecha DATE DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_cliente) REFERENCES clientes (id)
 );
 
