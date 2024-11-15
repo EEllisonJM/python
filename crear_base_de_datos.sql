@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS producto (
     nombre TEXT NOT NULL,
     precio INTEGER NOT NULL,
     existencia INTEGER NOT NULL,
-	caducidad TEXT,
+	caducidad DATE,
     fecha_creado DATE DEFAULT current_timestamp
 );
 
