@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS clientes (
     nombre TEXT NOT NULL,
     telefono INTEGER NOT NULL,
     direccion TEXT NOT NULL,
+    fecha_nacimiento DATE, 
     fecha_creado DATE DEFAULT CURRENT_TIMESTAMP
 );
 
