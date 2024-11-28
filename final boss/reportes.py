@@ -1,33 +1,45 @@
+import sqlite3
 from tkinter import ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 
+def obtener_datos_ventas():
+    conexion = sqlite3.connect("database.db")  # Cambia el nombre de tu base de datos
+    cursor = conexion.cursor()
+
+    # Consulta para obtener los totales de ventas por producto
+    query = """
+    SELECT p.nombre, subtotal
+    FROM detalle_de_venta dv
+    JOIN productos p ON dv.id_producto = p.id
+    GROUP BY p.nombre
+    ORDER BY subtotal DESC;
+    """
+    cursor.execute(query)
+    datos = cursor.fetchall()
+    conexion.close()
+
+    # Retornar los datos en forma de listas
+    nombres_productos = [fila[0] for fila in datos]
+    totales_ventas = [fila[1] for fila in datos]
+    return nombres_productos, totales_ventas
+
 def gestion_reportes(parent):
-    """
-    Creates and packs the report interface into the provided parent widget.
-    """
-    # Create a frame for the reports
+    # Crear un marco para los reportes
     frame = ttk.Frame(parent)
 
-    # Example sales data
-    ventas = [
-        {"id_producto": 1, "nombre": "Papas", "cantidad": 5, "total": 50.0},
-        {"id_producto": 2, "nombre": "Soda", "cantidad": 3, "total": 45.0},
-        {"id_producto": 3, "nombre": "Hamburguesa", "cantidad": 7, "total": 56.0}
-    ]
+    # Obtener datos desde la base de datos
+    nombres_productos, totales_ventas = obtener_datos_ventas()
 
-    # Extract data for the graph
-    nombres_productos = [venta["nombre"] for venta in ventas]
-    totales_ventas = [venta["total"] for venta in ventas]
-
-    # Create the graph
+    # Crear el gráfico
     fig, ax = plt.subplots(figsize=(6, 4))
     ax.bar(nombres_productos, totales_ventas, color='blue')
     ax.set_title('Ventas por Producto')
     ax.set_xlabel('Producto')
     ax.set_ylabel('Total de Ventas')
+    ax.tick_params(axis='x', rotation=45)  # Rotar etiquetas en el eje X para mejor legibilidad
 
-    # Integrate the graph into Tkinter
+    # Integrar el gráfico en Tkinter
     canvas = FigureCanvasTkAgg(fig, master=frame)
     canvas_widget = canvas.get_tk_widget()
     canvas_widget.pack(fill="both", expand=True)
