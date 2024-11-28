@@ -1,138 +1,155 @@
 import pygame
 import random
-import math
 
-# Inicialización de pygame
+# Initialize pygame
 pygame.init()
 
-# Configuración de la pantalla
-WIDTH, HEIGHT = 800, 600
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Asteroids")
+# Screen dimensions
+WIDTH, HEIGHT = 300, 600
+BLOCK_SIZE = 30
+GRID_WIDTH, GRID_HEIGHT = WIDTH // BLOCK_SIZE, HEIGHT // BLOCK_SIZE
 
-# Colores
-WHITE = (255, 255, 255)
+# Colors
 BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+GRAY = (128, 128, 128)
+COLORS = [
+    (0, 255, 255),  # Cyan
+    (255, 255, 0),  # Yellow
+    (255, 0, 0),    # Red
+    (0, 255, 0),    # Green
+    (0, 0, 255),    # Blue
+    (255, 165, 0),  # Orange
+    (128, 0, 128)   # Purple
+]
 
-# Configuración de la nave
-ship_size = 20
-ship_x, ship_y = WIDTH // 2, HEIGHT // 2
-ship_angle = 0
-ship_speed = 5
+# Shapes of Tetriminoes
+SHAPES = [
+    [[1, 1, 1, 1]],  # I
+    [[1, 1], [1, 1]],  # O
+    [[0, 1, 0], [1, 1, 1]],  # T
+    [[1, 0, 0], [1, 1, 1]],  # L
+    [[0, 0, 1], [1, 1, 1]],  # J
+    [[0, 1, 1], [1, 1, 0]],  # S
+    [[1, 1, 0], [0, 1, 1]]   # Z
+]
 
-# Configuración de los asteroides
-asteroid_size = 40
-asteroid_speed = 2
-asteroids = []
+class Tetrimino:
+    def __init__(self, shape):
+        self.shape = shape
+        self.color = random.choice(COLORS)
+        self.x = GRID_WIDTH // 2 - len(shape[0]) // 2
+        self.y = 0
 
-# Configuración de los disparos
-bullets = []
-bullet_speed = 10
+    def rotate(self):
+        self.shape = [list(row) for row in zip(*self.shape[::-1])]
 
-# Funciones para crear y mover asteroides
-def create_asteroid():
-    x = random.randint(0, WIDTH)
-    y = random.randint(0, HEIGHT)
-    angle = random.uniform(0, 2 * math.pi)
-    asteroids.append({"x": x, "y": y, "angle": angle})
+class Tetris:
+    def __init__(self):
+        self.grid = [[BLACK] * GRID_WIDTH for _ in range(GRID_HEIGHT)]
+        self.current_piece = Tetrimino(random.choice(SHAPES))
+        self.next_piece = Tetrimino(random.choice(SHAPES))
+        self.score = 0
+        self.running = True
 
-def move_asteroids():
-    for asteroid in asteroids:
-        asteroid["x"] += asteroid_speed * math.cos(asteroid["angle"])
-        asteroid["y"] += asteroid_speed * math.sin(asteroid["angle"])
-        # Teletransportar el asteroide si sale de la pantalla
-        asteroid["x"] %= WIDTH
-        asteroid["y"] %= HEIGHT
+    def valid_move(self, piece, dx, dy):
+        for i, row in enumerate(piece.shape):
+            for j, cell in enumerate(row):
+                if cell:
+                    x = piece.x + j + dx
+                    y = piece.y + i + dy
+                    if x < 0 or x >= GRID_WIDTH or y >= GRID_HEIGHT or (y >= 0 and self.grid[y][x] != BLACK):
+                        return False
+        return True
 
-# Función para disparar balas
-def shoot():
-    angle_rad = math.radians(ship_angle)
-    bullet_x = ship_x + ship_size * math.cos(angle_rad)
-    bullet_y = ship_y + ship_size * math.sin(angle_rad)
-    bullets.append({"x": bullet_x, "y": bullet_y, "angle": angle_rad})
+    def lock_piece(self):
+        for i, row in enumerate(self.current_piece.shape):
+            for j, cell in enumerate(row):
+                if cell:
+                    self.grid[self.current_piece.y + i][self.current_piece.x + j] = self.current_piece.color
+        self.clear_lines()
+        self.current_piece = self.next_piece
+        self.next_piece = Tetrimino(random.choice(SHAPES))
+        if not self.valid_move(self.current_piece, 0, 0):
+            self.running = False
 
-def move_bullets():
-    for bullet in bullets[:]:
-        bullet["x"] += bullet_speed * math.cos(bullet["angle"])
-        bullet["y"] += bullet_speed * math.sin(bullet["angle"])
-        if bullet["x"] < 0 or bullet["x"] > WIDTH or bullet["y"] < 0 or bullet["y"] > HEIGHT:
-            bullets.remove(bullet)
+    def clear_lines(self):
+        new_grid = [row for row in self.grid if any(cell == BLACK for cell in row)]
+        cleared = GRID_HEIGHT - len(new_grid)
+        self.grid = [[BLACK] * GRID_WIDTH for _ in range(cleared)] + new_grid
+        self.score += cleared * 10
 
-# Función para dibujar objetos
-def draw_objects():
-    screen.fill(BLACK)
-    # Dibujar la nave
-    angle_rad = math.radians(ship_angle)
-    tip_x = ship_x + ship_size * math.cos(angle_rad)
-    tip_y = ship_y + ship_size * math.sin(angle_rad)
-    pygame.draw.polygon(screen, WHITE, [(tip_x, tip_y),
-                                        (ship_x + ship_size * math.cos(angle_rad + 4 * math.pi / 5), 
-                                         ship_y + ship_size * math.sin(angle_rad + 4 * math.pi / 5)),
-                                        (ship_x + ship_size * math.cos(angle_rad - 4 * math.pi / 5), 
-                                         ship_y + ship_size * math.sin(angle_rad - 4 * math.pi / 5))])
+    def move(self, dx, dy):
+        if self.valid_move(self.current_piece, dx, dy):
+            self.current_piece.x += dx
+            self.current_piece.y += dy
+        elif dy:
+            self.lock_piece()
 
-    # Dibujar asteroides
-    for asteroid in asteroids:
-        pygame.draw.circle(screen, WHITE, (int(asteroid["x"]), int(asteroid["y"])), asteroid_size // 2)
+    def rotate(self):
+        old_shape = self.current_piece.shape
+        self.current_piece.rotate()
+        if not self.valid_move(self.current_piece, 0, 0):
+            self.current_piece.shape = old_shape
 
-    # Dibujar balas
-    for bullet in bullets:
-        pygame.draw.circle(screen, WHITE, (int(bullet["x"]), int(bullet["y"])), 3)
+    def draw_grid(self, screen):
+        for y, row in enumerate(self.grid):
+            for x, cell in enumerate(row):
+                pygame.draw.rect(screen, cell, (x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE))
+                pygame.draw.rect(screen, GRAY, (x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE), 1)
 
-    pygame.display.flip()
+    def draw_piece(self, screen, piece):
+        for i, row in enumerate(piece.shape):
+            for j, cell in enumerate(row):
+                if cell:
+                    pygame.draw.rect(screen, piece.color, (
+                        (piece.x + j) * BLOCK_SIZE, (piece.y + i) * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE
+                    ))
+                    pygame.draw.rect(screen, GRAY, (
+                        (piece.x + j) * BLOCK_SIZE, (piece.y + i) * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE
+                    ), 1)
 
-# Función de colisión entre balas y asteroides
-def check_collisions():
-    global asteroids, bullets
-    for bullet in bullets[:]:
-        for asteroid in asteroids[:]:
-            distance = math.hypot(bullet["x"] - asteroid["x"], bullet["y"] - asteroid["y"])
-            if distance < asteroid_size // 2:
-                bullets.remove(bullet)
-                asteroids.remove(asteroid)
-                break
+    def draw(self, screen):
+        screen.fill(BLACK)
+        self.draw_grid(screen)
+        self.draw_piece(screen, self.current_piece)
+        pygame.display.flip()
 
-# Bucle principal del juego
-running = True
-clock = pygame.time.Clock()
+def main():
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption("Tetris")
+    clock = pygame.time.Clock()
+    game = Tetris()
 
-# Crear algunos asteroides inicialmente
-for _ in range(5):
-    create_asteroid()
+    # Timing variables
+    fall_time = 0
+    fall_speed = 500  # Milliseconds per block fall
 
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                shoot()
+    while game.running:
+        screen.fill(BLACK)
+        game.draw(screen)
+        dt = clock.tick(30)
+        fall_time += dt
 
-    # Controles de la nave
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT]:
-        ship_angle += 5
-    if keys[pygame.K_RIGHT]:
-        ship_angle -= 5
-    if keys[pygame.K_UP]:
-        ship_x += ship_speed * math.cos(math.radians(ship_angle))
-        ship_y += ship_speed * math.sin(math.radians(ship_angle))
+        # Piece falls every `fall_speed` milliseconds
+        if fall_time > fall_speed:
+            game.move(0, 1)
+            fall_time = 0
 
-    # Teletransportar la nave si sale de la pantalla
-    ship_x %= WIDTH
-    ship_y %= HEIGHT
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                game.running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    game.move(-1, 0)
+                elif event.key == pygame.K_RIGHT:
+                    game.move(1, 0)
+                elif event.key == pygame.K_DOWN:
+                    game.move(0, 1)
+                elif event.key == pygame.K_UP:
+                    game.rotate()
 
-    # Mover y actualizar los objetos
-    move_asteroids()
-    move_bullets()
-    check_collisions()
-    draw_objects()
+    pygame.quit()
 
-    # Generar nuevos asteroides si quedan pocos
-    if len(asteroids) < 5:
-        create_asteroid()
-
-    # Control de velocidad del juego
-    clock.tick(30)
-
-pygame.quit()
+if __name__ == "__main__":
+    main()
