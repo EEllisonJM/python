@@ -4,9 +4,6 @@ from tkinter import ttk, messagebox
 import sqlite3
 
 def gestion_clientes(parent):
-    """
-    Crea el frame de gestión de clientes dentro de un contenedor dado (parent).
-    """
     # Crear el frame principal
     frame = ttk.Frame(parent)
 

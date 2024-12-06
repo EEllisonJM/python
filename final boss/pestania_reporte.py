@@ -3,6 +3,7 @@ from tkinter import ttk
 from productos import gestion_productos
 from clientes import gestion_clientes
 from reportes import gestion_reportes  # Import the reports module
+from ventas import gestion_ventas  # Import the reports module
 
 # Crear la ventana principal
 root = tk.Tk()
@@ -17,20 +18,25 @@ icon_clientes = tk.PhotoImage(file="clientes_icon.png")
 icon_productos = tk.PhotoImage(file="productos_icon.png")
 icon_grafica = tk.PhotoImage(file="grafica_icon.png")
 
-# Pestaña 1
+# Pestaña Ventas
 tab1 = ttk.Frame(notebook)
-notebook.add(tab1, text="Clientes", image=icon_clientes, compound="left")
-gestion_clientes(tab1).pack(fill="both", expand=True)
+notebook.add(tab1, text="Ventas", image=icon_grafica, compound="left")
+gestion_ventas(tab1).pack(fill="both", expand=True)
+
+# Pestaña 1
+tab2 = ttk.Frame(notebook)
+notebook.add(tab2, text="Clientes", image=icon_clientes, compound="left")
+gestion_clientes(tab2).pack(fill="both", expand=True)
 
 # Pestaña 2
-tab2 = ttk.Frame(notebook)
-notebook.add(tab2, text="Productos", image=icon_productos, compound="left")
-gestion_productos(tab2).pack(fill="both", expand=True)
+tab3 = ttk.Frame(notebook)
+notebook.add(tab3, text="Productos", image=icon_productos, compound="left")
+gestion_productos(tab3).pack(fill="both", expand=True)
 
 # Pestaña 3
-tab3 = ttk.Frame(notebook)
-notebook.add(tab3, text="Reportes", image=icon_grafica, compound="left")
-gestion_reportes(tab3).pack(fill="both", expand=True)
+tab4 = ttk.Frame(notebook)
+notebook.add(tab4, text="Reportes", image=icon_grafica, compound="left")
+gestion_reportes(tab4).pack(fill="both", expand=True)
 
 #...
 

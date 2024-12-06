@@ -43,7 +43,7 @@ def actualizar_grafico(fig, ax, canvas):
 
 def gestion_reportes(parent):
     # Crear un marco para los reportes
-    frame = ttk.Frame(parent)
+    ventana = ttk.Frame(parent)
 
     # Obtener datos iniciales desde la base de datos
     nombres_productos, totales_ventas = obtener_datos_ventas()
@@ -57,16 +57,16 @@ def gestion_reportes(parent):
     ax.tick_params(axis='x', rotation=45)
 
     # Integrar el gráfico en Tkinter
-    canvas = FigureCanvasTkAgg(fig, master=frame)
+    canvas = FigureCanvasTkAgg(fig, master=ventana)
     canvas_widget = canvas.get_tk_widget()
     canvas_widget.pack(fill="both", expand=True)
 
     # Crear botón para actualizar
     boton_actualizar = Button(
-        frame,
+        ventana,
         text="Actualizar",
         command=lambda: actualizar_grafico(fig, ax, canvas)
     )
     boton_actualizar.pack(pady=10)  # Agregar margen vertical al botón
 
-    return frame
+    return ventana
